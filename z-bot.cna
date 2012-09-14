@@ -14,8 +14,9 @@ on ready {
 	add(@include_files, script_resource('z-bot.cna'), 0);
 
 	foreach $file (@include_files) {
-		println($file);
-		include($file);
+		if ($file !hasmatch 'z-bot.cna') {
+			include($file);
+		}
 		$handle = openf($file);
 
 		while $line (readln($handle)) {
@@ -25,7 +26,6 @@ on ready {
 				$cmd = split("_", @pieces[1]);
 				$cmd = $cmd[1];
 				%commands[$cmd] = $function;
-				println("[*] Added $cmd");
 			}
 		}
 	}
