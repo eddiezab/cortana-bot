@@ -1,0 +1,18 @@
+sub cmd_killsessions {
+	local('@exclude_sids');
+
+	if (size($1) != 0) {
+		@exclude_sids = $1;
+	}
+
+	foreach $id => $value (sessions()) {
+		if ($id !in @exclude_sids) {
+			session_close($id);
+			println("kiling $value['session_host']");
+		}
+	}
+}
+
+sub help_killsessions {
+	return "Kills all sessions. Provide space-separated session ids to exclude from being killed.";
+}

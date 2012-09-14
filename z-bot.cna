@@ -1,0 +1,86 @@
+debug(7);
+
+global('%commands $console');
+
+%commands = %();
+
+on ready {
+	local('$handle $line @pieces $cmd $function @include_files $file');
+
+	$console = console();
+
+	@include_files = copy(ls(script_resource('z-addons')));
+
+	add(@include_files, script_resource('z-bot.cna'), 0);
+
+	foreach $file (@include_files) {
+		println($file);
+		include($file);
+		$handle = openf($file);
+
+		while $line (readln($handle)) {
+			if ($line hasmatch "sub cmd_" && $line !hasmatch "hasmatch") {
+				@pieces = split(" ", $line);
+				$function = function("&" . @pieces[1]);
+				$cmd = split("_", @pieces[1]);
+				$cmd = $cmd[1];
+				%commands[$cmd] = $function;
+				elog("[*] Added $cmd");
+			}
+		}
+	}
+
+	db_workspace(%(size => 10000, session => 1));
+
+	elog("[*] Z-bot loaded.");
+}
+
+on event_read {	
+	local('$event_data');
+	$event_data = parse_event($1);
+
+	if ($event_data[0] eq "message") {
+		if (charAt($event_data[3], 0) eq "!") {
+			parse_command($event_data[3]);
+		}
+	} else {		
+	}
+}
+
+
+sub parse_command {	
+	local('$vals $cmd %cmd_data $command');
+
+	$vals = split(" ", $1);
+
+	$cmd = substr(shift($vals), 1);
+
+	%cmd_data = %(cmd => $cmd, args => $vals);
+
+	$command = %commands[%cmd_data["cmd"]];
+	
+	[$command: %cmd_data["args"]];
+}
+
+sub cmd_help {
+	local('$key $value');
+
+	say("The following commands are available: ");
+	say("	Command:	Description");
+	say("	-------	-----------");
+	
+	foreach $key => $value (%commands) {
+		$help_desc_function = function('&help_' . $key);
+		if ($help_desc_function is $null) {
+			say("	!" . $key . ":	N/A");
+		} else {
+			say("	!" . $key . ":	" . [$help_desc_function: ""]);
+		}
+	}
+}
+
+sub help_help {
+	return "Shows help";
+}
+
+

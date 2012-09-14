@@ -1,0 +1,36 @@
+sub cmd_prunesessions {
+	local('%host_sessions');
+
+	%host_sessions = %();
+
+	foreach $id => $value (sessions()) {
+			@session_ids = %host_sessions[$value['session_host']];
+			if (size(@session_ids) == 0) {
+				@session_ids = @();
+			}
+			push(@session_ids, $id);
+			%host_sessions[$value['session_host']] = @session_ids;
+		}
+
+		elog ("Session watcher sees " . size(%host_sessions) . " hosts.");
+
+		foreach $ip => @session_ids (%host_sessions) {
+			if (size(@session_ids) > 2) {
+				elog("$ip has " . size(@session_ids) . " sessions. Pruning.");
+				println("$ip : " . @session_ids);
+				
+				$y = size(@session_ids) - 2;
+				
+				for ($x = $y; $x > 0; $x--) {
+					$session_id = shift(@session_ids);
+					println ("$ip -> $session_id ");
+					if ($session_id !is $null) {
+						session_close($session_id);
+						elog("Session $session_id has been closed ( $ip ).");
+					}
+				}
+			} else {
+				elog("$ip has " . size(@session_ids) . " sessions. Not pruning.");
+			}
+		}
+}

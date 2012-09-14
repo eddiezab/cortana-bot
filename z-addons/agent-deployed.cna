@@ -1,0 +1,21 @@
+on session_open {
+	cmd_sheep();
+}
+
+sub cmd_sheep {
+
+	local('@wav_files');
+
+	@wav_files = 
+		@(
+			script_resource('sounds/agent_deployed_1.wav')
+		);	
+	
+	@args = @(
+		'/usr/bin/aplay',
+		rand(@wav_files)
+	);
+
+	exec(@args);
+}
+
