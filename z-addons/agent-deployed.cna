@@ -4,13 +4,9 @@ on session_open {
 
 sub cmd_sheep {
 
-	local('@wav_files');
+	local('@wav_files @args');
 
-	@wav_files = 
-		@(
-			script_resource('sounds/agent_deployed_1.wav'),
-			script_resource('sounds/agent_deployed_2.wav')
-		);	
+	@wav_files = ls(script_resource('sounds/'));
 	
 	@args = @(
 		'/usr/bin/aplay',
