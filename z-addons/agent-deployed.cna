@@ -8,7 +8,8 @@ sub cmd_sheep {
 
 	@wav_files = 
 		@(
-			script_resource('sounds/agent_deployed_1.wav')
+			script_resource('sounds/agent_deployed_1.wav'),
+			script_resource('sounds/agent_deployed_2.wav')
 		);	
 	
 	@args = @(
